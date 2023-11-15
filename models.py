@@ -1,11 +1,7 @@
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
-from app import db, app, bcrypt 
+from init import db, bcrypt 
 
-
-with app.app_context():
-    db.drop_all()
-    db.create_all()
 
 
 class User(db.Model):

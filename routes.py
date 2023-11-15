@@ -1,5 +1,5 @@
-from flask import Blueprint, redirect, render_template
-from app import db
+from flask import Blueprint, redirect, render_template, session
+from init import db
 from models import User
 from forms import UserForm
 
@@ -24,5 +24,5 @@ def sign_up():
         )
         db.session.add(new_user)
         db.session.commit()
-        
+        session["user_id"] = new_user.username
     return render_template("sign_up.htnl", form=form)
