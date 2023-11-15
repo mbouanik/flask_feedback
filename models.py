@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from app import db, app, bcrypt 
 
@@ -11,9 +11,11 @@ with app.app_context():
 class User(db.Model):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    username: Mapped[str] = mapped_column(String, nullable=False, unique=True)
-    password: Mapped[str] = mapped_column(String, nullable=False)
+    username: Mapped[str] = mapped_column(String(20), nullable=False, primary_key=True)
+    password: Mapped[str] = mapped_column(Text, nullable=False)
+    email:  Mapped[str] = mapped_column(String(50), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(30), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(30), nullable=False)
 
     def __init__(self, **kwargs) -> None:
         super(User, self).__init__(**kwargs)
