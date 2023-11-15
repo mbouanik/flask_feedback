@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, session
 from init import db
 from models import User
-from forms import UserForm
+from forms import LoginForm, UserForm
 
 
 app_routes = Blueprint("app_routes", __name__, template_folder="templates")
@@ -25,4 +25,28 @@ def sign_up():
         db.session.add(new_user)
         db.session.commit()
         session["user_id"] = new_user.username
-    return render_template("sign_up.htnl", form=form)
+        return redirect("/secret")
+    return render_template("sign_up.html", form=form)
+
+@app_routes.route("/login", methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        if User.authenticate(username, password):
+            session["user_id"] = username
+            return redirect("/secret")
+    return render_template("login.html", form=form)
+
+@app_routes.route("/secret")
+def secret():
+    if session.get("user_id", None):
+        user = db.get_or_404(User, session["user_id"])
+        return render_template("secret.html", user=user)
+    return redirect("/register")
+
+@app_routes.route("/logout", methods=["POST"])
+def logout():
+    session.pop("user_id")
+    return redirect("/login")
