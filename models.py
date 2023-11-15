@@ -26,7 +26,7 @@ class User(db.Model):
 
     @classmethod
     def authenticate(cls, username, pwd):
-        user = db.session.execute(db.select(User).where(User.username == username)).scalar_one_or_none()
+        user = db.get_or_404(User, username)
         
         if user and bcrypt.check_password_hash(user.password, pwd):
             return user

@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, session
+from flask import Blueprint, flash, redirect, render_template, session
 from init import db
 from models import User
 from forms import LoginForm, UserForm
@@ -25,7 +25,7 @@ def sign_up():
         db.session.add(new_user)
         db.session.commit()
         session["user_id"] = new_user.username
-        return redirect("/secret")
+        return redirect(f"/users/{new_user.username}")
     return render_template("sign_up.html", form=form)
 
 @app_routes.route("/login", methods=["GET", "POST"])
@@ -36,17 +36,18 @@ def login():
         password = form.password.data
         if User.authenticate(username, password):
             session["user_id"] = username
-            return redirect("/secret")
+            return redirect(f"/users/{username}")
     return render_template("login.html", form=form)
 
-@app_routes.route("/secret")
-def secret():
+@app_routes.route("/users/<username>")
+def secret(username):
     if session.get("user_id", None):
-        user = db.get_or_404(User, session["user_id"])
+        user = db.get_or_404(User, username)
         return render_template("secret.html", user=user)
+    flash("Login first")
     return redirect("/register")
 
 @app_routes.route("/logout", methods=["POST"])
 def logout():
     session.pop("user_id")
-    return redirect("/login")
+    return redirect("/")
