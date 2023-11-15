@@ -21,11 +21,11 @@ class User(db.Model):
         super(User, self).__init__(**kwargs)
 
     @classmethod
-    def registration(cls, username, pwd):
+    def registration(cls, username, pwd, email, first_name, last_name):
         hashed_pwd = bcrypt.generate_password_hash(pwd)
         utf8_hashed_pwd = hashed_pwd.decode("utf8")
 
-        return cls(username=username, password=utf8_hashed_pwd)
+        return cls(username=username, password=utf8_hashed_pwd, email=email, first_name=first_name, last_name=last_name)
     
 
     @classmethod
