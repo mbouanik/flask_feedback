@@ -1,7 +1,20 @@
-from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped,Relationship, mapped_column
 from init import db, bcrypt 
 
+
+class Feedback(db.Model):
+    __tablename__ = "feedbacks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+
+    username: Mapped[str] = mapped_column(String, ForeignKey("users.username"), nullable=False)
+
+
+    def __init__(self, **kwargs) -> None:
+        super(Feedback, self).__init__(**kwargs)
 
 
 class User(db.Model):
@@ -12,6 +25,8 @@ class User(db.Model):
     email:  Mapped[str] = mapped_column(String(50), nullable=False)
     first_name: Mapped[str] = mapped_column(String(30), nullable=False)
     last_name: Mapped[str] = mapped_column(String(30), nullable=False)
+    
+    feedbacks: Mapped[Feedback] = Relationship("Feedback", backref="user", cascade="all, delete")
 
     def __init__(self, **kwargs) -> None:
         super(User, self).__init__(**kwargs)
@@ -32,4 +47,5 @@ class User(db.Model):
             return user
         
         return False
+
 

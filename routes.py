@@ -1,7 +1,7 @@
-from flask import Blueprint, flash, redirect, render_template, session
+from flask import Blueprint, redirect, render_template, session
 from init import db
-from models import User
-from forms import LoginForm, UserForm
+from models import Feedback, User
+from forms import FeedbackForm, LoginForm, UserForm
 
 
 app_routes = Blueprint("app_routes", __name__, template_folder="templates")
@@ -9,6 +9,8 @@ app_routes = Blueprint("app_routes", __name__, template_folder="templates")
 
 @app_routes.route("/")
 def home():
+    if session.get("user_id", None):
+        return redirect(f"/users/{session['user_id']}")
     return redirect("/register") 
 
 @app_routes.route("/register", methods=["GET", "POST"])
@@ -44,10 +46,49 @@ def secret(username):
     if session.get("user_id", None):
         user = db.get_or_404(User, username)
         return render_template("secret.html", user=user)
-    flash("Login first")
     return redirect("/register")
 
 @app_routes.route("/logout", methods=["POST"])
 def logout():
     session.pop("user_id")
     return redirect("/")
+
+@app_routes.route("/users/<username>/delete", methods=["POST"])
+def delete_user(username):
+    user = db.get_or_404(User, username)
+    if user and session["user_id"] == user.username:
+        db.session.delete(user)
+        db.session.commit()
+    return redirect('/')
+
+@app_routes.route("/users/<username>/add", methods=["GET", "POST"])
+def add_feedback(username):
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        feedback = Feedback()
+        form.populate_obj(feedback)
+        feedback.username=username
+        db.session.add(feedback)
+        db.session.commit()
+        return redirect("/")
+    return render_template("feedback_form.html", form=form)
+
+@app_routes.route("/feedback/<feedback_id>/update", methods=["GET","POST"])
+def edit_feedback(feedback_id):
+    feedback = db.get_or_404(Feedback, feedback_id)
+    form = FeedbackForm(obj=feedback)
+    if form.validate_on_submit() and session["user_id"] == feedback.username:
+        form.populate_obj(feedback)
+        db.session.add(feedback)
+        db.session.commit()
+        return redirect(f"/users/{session['user_id']}")
+    return render_template("feedback_form.html", form=form)
+
+@app_routes.route("/feedback/<feedback_id>/delete", methods=['POST'])
+def delete_feedback(feedback_id):
+    feedback = db.get_or_404(Feedback, feedback_id)
+    if feedback and session["user_id"] == feedback.username:
+        db.session.delete(feedback)
+        db.session.commit()
+    return redirect(f"/users/{session['user_id']}")
+    

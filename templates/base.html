@@ -11,6 +11,7 @@
         <form action="/logout" method="POST">
             <button class="link">logout</button>
         </form>
+        <a href="/users/{{ session['user_id'] }}/add ">Add FeedBack </a>
         {% else %}
         <a href="/register"> sign up </a>
         <a href="/login">login</a>
