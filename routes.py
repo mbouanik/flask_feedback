@@ -13,10 +13,14 @@ def home():
         return redirect(f"/users/{session['user_id']}")
     return redirect("/register") 
 
+
 @app_routes.route("/register", methods=["GET", "POST"])
 def sign_up():
     form = UserForm()
     if form.validate_on_submit():
+        """
+        using the class method of the model to create the new user and hash pwd
+        """
         new_user = User.registration(
             username=form.username.data,
             pwd=form.password.data,
@@ -30,16 +34,21 @@ def sign_up():
         return redirect(f"/users/{new_user.username}")
     return render_template("sign_up.html", form=form)
 
+
 @app_routes.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
+        """
+        using class method funtion to authenticate the user
+        """
         if User.authenticate(username, password):
             session["user_id"] = username
             return redirect(f"/users/{username}")
     return render_template("login.html", form=form)
+
 
 @app_routes.route("/users/<username>")
 def secret(username):
@@ -48,10 +57,12 @@ def secret(username):
         return render_template("secret.html", user=user)
     return redirect("/register")
 
+
 @app_routes.route("/logout", methods=["POST"])
 def logout():
     session.pop("user_id")
     return redirect("/")
+
 
 @app_routes.route("/users/<username>/delete", methods=["POST"])
 def delete_user(username):
@@ -60,6 +71,7 @@ def delete_user(username):
         db.session.delete(user)
         db.session.commit()
     return redirect('/')
+
 
 @app_routes.route("/users/<username>/add", methods=["GET", "POST"])
 def add_feedback(username):
@@ -73,6 +85,7 @@ def add_feedback(username):
         return redirect("/")
     return render_template("feedback_form.html", form=form)
 
+
 @app_routes.route("/feedback/<feedback_id>/update", methods=["GET","POST"])
 def edit_feedback(feedback_id):
     feedback = db.get_or_404(Feedback, feedback_id)
@@ -83,6 +96,7 @@ def edit_feedback(feedback_id):
         db.session.commit()
         return redirect(f"/users/{session['user_id']}")
     return render_template("feedback_form.html", form=form)
+
 
 @app_routes.route("/feedback/<feedback_id>/delete", methods=['POST'])
 def delete_feedback(feedback_id):

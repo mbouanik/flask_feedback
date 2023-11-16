@@ -2,7 +2,9 @@ from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped,Relationship, mapped_column
 from init import db, bcrypt 
 
-
+"""
+all the models for the app
+"""
 class Feedback(db.Model):
     __tablename__ = "feedbacks"
 
@@ -30,7 +32,10 @@ class User(db.Model):
 
     def __init__(self, **kwargs) -> None:
         super(User, self).__init__(**kwargs)
-
+    
+    """
+    hash the password at registration
+    """
     @classmethod
     def registration(cls, username, pwd, email, first_name, last_name):
         hashed_pwd = bcrypt.generate_password_hash(pwd)
@@ -39,6 +44,9 @@ class User(db.Model):
         return cls(username=username, password=utf8_hashed_pwd, email=email, first_name=first_name, last_name=last_name)
     
 
+    """
+    Check if the password is valid
+    """
     @classmethod
     def authenticate(cls, username, pwd):
         user = db.get_or_404(User, username)
